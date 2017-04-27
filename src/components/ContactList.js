@@ -1,156 +1,85 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { StyleSheet, View, ListView, ActivityIndicator } from 'react-native';
-import { loadContact } from '../actions';
+import React, {Component} from 'react';
+import {Text, View, ScrollView, ListView,TouchableOpacity} from 'react-native';
 import ContactItem from './ContactItem';
-import { Spinner } from './common';
-import {
-    LazyloadListView,
-    LazyloadView
-} from 'react-native-lazyload';
+import Spinner from './common/Spinner';
 
 class ContactList extends Component {
-  componentWillMount() {
-    this.props.loadContact();
 
-    this.createDataSource(this.props)
-    /*
-    this.props.loadContact().then(resp => {
-      console.log(resp);
-      console.log(this.props);
-
-      this.createDataSource(resp);
-    });*/
-
-    // const { contacts: [] } = this.props;
-    //
-    // console.log("1+ "+this.props);
-
-    // this.createDataSource(contacts);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    // nextProps are the next set of props that this component
-    // will be rendered with
-    // this.props is still the old set of props
-
-    this.createDataSource(nextProps);
-  }
-
-  createDataSource({contacts}) {
-    const ds = new ListView.DataSource({
-      rowHasChanged: (r1, r2) => r1 !== r2
-    });
-
-    this.dataSource = ds.cloneWithRows(contacts);
-    //console.log(this.dataSource);
-  }
-
-  renderList() {
-    if (this.props.loading) {
-      return (
-        <ActivityIndicator
-          animating
-          size="large"
-        />
-      );
+    componentWillMount() {
+        this._createDataSource()
     }
 
-    return (
-      <ListView
-        enableEmptySections
-        dataSource={this.dataSource}
-        renderRow={this.renderRow}
-      />
+    componentWillReceiveProps(nextProps) {
+        // console.log('componentWillReceiveProps list '+JSON.stringify(this.props));
+        this.dataSource = this.dataSource.cloneWithRows(nextProps.contacts);
+    }
+
+    _createDataSource = () => {
+        const { contacts } = this.props;
+        const ds = new ListView.DataSource({
+            rowHasChanged: (r1, r2) => r1 !== r2
+        });
+        this.dataSource = ds.cloneWithRows(contacts);
+    }
+
+
+    _renderRow = (contact) => {
+        console.log('contact => '+ contact)
+        return <ContactItem contact={contact} />
+    }
+
+    _renderRetryButton = () => (
+        <TouchableOpacity onPress={() => this.refreshData()} >
+            <View style={styles.errorViewStyle}>
+                <Text style={styles.errorTextStyle}>Cannot Load Data!!</Text>
+                <Text style={styles.smallErrorTextStyle}>Tap to retry</Text>
+            </View>
+        </TouchableOpacity>
     );
-  }
 
+    render() {
+        const { loading, error, contacts } = this.props;
 
-  renderRow = (contact) => {
-        return (<View
-        >
-            <LazyloadView
-                host="listExample"
-            >
-                <ContactItem contact={contact} />
-            </LazyloadView>
-        </View>);
-    };
+        console.log(this.props)
+        console.log(this.dataSource);
 
-  render() {
-    return (
-      <LazyloadListView
-            enableEmptySections
-            name="listExample"
-            dataSource={this.dataSource}
-            renderRow={this.renderRow}
-            scrollRenderAheadDistance={200}
-            renderScrollComponent={()=>{}}
-            renderDistance={100}
-            pageSize={1}
-            initialListSize={10}
-            onEndReachedThreshold={10}
-        />
-      /*<View style={this.props.loading && styles.loading}>
-        {this.renderList()}
-      </View>*/
-    );
-  }
+        if (this.props.loading) {
+            console.log('loading')
+            return <Spinner size="large"/>
+        }
+
+        if (this.props.error === 'Cannot Load Data'){
+            console.log('error view')
+            return this._renderRetryButton()
+        }
+        return (
+            <ListView 
+                enableEmptySections 
+                dataSource={this.dataSource} 
+                renderRow={this._renderRow}
+            />
+        );
+    }  
 }
 
-const styles = StyleSheet.create({
-  loading: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,.2)'
-  }
-});
-
-const mapStateToProps = ({ contactReducer }) => {
-  const { contacts, error, loading } = contactReducer;
-
-  return { contacts, error, loading };
-};
-
-export default connect(mapStateToProps, { loadContact })(ContactList);
-
-
-/*import React, { Component } from 'react';
-import { ListView } from 'react-native';
-import { connect } from 'react-redux';
-import ListItem from './ContactItem';
-
-class ContactList extends Component {
-  componentWillMount() {
-    const ds = new ListView.DataSource({
-      rowHasChanged: (r1, r2) => r1 !== r2
-    });
-
-    this.dataSource = ds.cloneWithRows(this.props.contacts);
-  }
-
-  renderRow(library) {
-    return <ListItem library={library} />;
-  }
-
-  render() {
-    return (
-      <ListView
-        dataSource={this.dataSource}
-        renderRow={this.renderRow}
-      />
-    );
-  }
+const styles = {
+    scrollViewStyle : {
+        paddingTop: 10
+    },errorViewStyle : {
+        backgroundColor:"#8b0000",
+        justifyContent:'center',
+        alignItems:'center',
+        height:45 ,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+    },errorTextStyle :{
+        fontSize: 15,
+        color:"#d3d3d3",
+    },smallErrorTextStyle: {
+        color:"#9c9b9b"
+    }
 }
 
-const mapStateToProps = state => {
-  return { contacts: state.contacts };
-};
-
-export default connect(mapStateToProps)(ContactList);
-*/
+export default ContactList;

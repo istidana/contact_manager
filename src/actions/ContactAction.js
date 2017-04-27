@@ -10,7 +10,7 @@ import {
 export const loadContact = () => {
   return (dispatch) => {
 
-    const host = 'http://192.168.100.18:3000/contacts'
+    const host = 'http://192.168.110.71:3000/contacts'
     const url = `${host}`
     let options = Object.assign({ method: 'get' }, null)
     options.headers = {
@@ -66,7 +66,7 @@ export const contactCreate = ({ firstName, lastName, age }) => {
 
   return (dispatch) => {
 
-    const host = 'http://192.168.100.18:3000/contacts'
+    const host = 'http://192.168.110.71:3000/contacts'
     const url = `${host}`
     let options = Object.assign({ method: 'post' }, null)
     options.headers = {
@@ -98,7 +98,7 @@ export const contactCreate = ({ firstName, lastName, age }) => {
 
 export const contactDelete = ({id}) =>{
    return (dispatch) => {
-    const host = 'http://192.168.100.18:3000/contacts/'+id
+    const host = 'http://192.168.110.71:3000/contacts/'+id
     const url = `${host}`
     console.log('id: '+id);
     console.log('host: '+host);
@@ -122,7 +122,7 @@ export const contactDelete = ({id}) =>{
 
 export const contactEdit = ({id, firstName, lastName, age}) =>{
   return (dispatch) => {
-    const host = 'http://192.168.100.18:3000/contacts/'+id
+    const host = 'http://192.168.110.71:3000/contacts/'+id
     const url = `${host}`
     let options = Object.assign({ method: 'put' }, null)
     options.headers = {
